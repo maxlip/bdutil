@@ -91,6 +91,9 @@ Flags:
   --network
     Specify a network name with which to associate new virtual machines.
 
+  --subnet
+    Specify a subnetwork name - applies to Custom/Subnetted networks.
+
   -n, --num_workers
     The number of worker nodes to create.
 
@@ -341,7 +344,9 @@ function prompt_confirmation() {
       GCE_IMAGE_FAMILY='${GCE_IMAGE_FAMILY?}'
       GCE_ZONE='${GCE_ZONE?}'
       GCE_NETWORK='${GCE_NETWORK?}'
+      GCE_SUBNET='${GCE_SUBNET?}'
       GCE_TAGS='${GCE_TAGS?}'
+      GCE_LABELS='${GCE_LABELS?}'
       PREEMPTIBLE_FRACTION=${PREEMPTIBLE_FRACTION?}
       PREFIX='${PREFIX?}'
       NUM_WORKERS=${NUM_WORKERS?}
@@ -838,7 +843,9 @@ function create_cluster() {
           ${optional_preemptible_arg} \
           ${image_flags} \
           --network=${GCE_NETWORK} \
+          --subnet=${GCE_SUBNET} \
           --tags=${GCE_TAGS} \
+          --labels=${GCE_LABELS} \
           --scopes $(export IFS=,; echo "${GCE_SERVICE_ACCOUNT_SCOPES[*]}";) \
           --boot-disk-type=pd-standard \
           ${optional_disk_arg} &
@@ -865,7 +872,9 @@ function create_cluster() {
         --machine-type=${GCE_MASTER_MACHINE_TYPE} \
         ${image_flags} \
         --network=${GCE_NETWORK} \
+        --subnet=${GCE_SUBNET} \
         --tags=${GCE_TAGS} \
+        --labels=${GCE_LABELS} \
         --scopes $(export IFS=,; echo "${GCE_SERVICE_ACCOUNT_SCOPES[*]}";) \
         --boot-disk-type=pd-standard \
         ${optional_disk_arg} &
@@ -1539,9 +1548,19 @@ function parse_input() {
         echo "GCE_NETWORK=$2" >> ${OVERRIDES_FILE}
         shift 2
         ;;
+      --subnet)
+        validate_argument $1 $2
+        echo "GCE_SUBNET=$2" >> ${OVERRIDES_FILE}
+        shift 2
+        ;;
       --tags)
         validate_argument $1 $2
         echo "GCE_TAGS=$2" >> ${OVERRIDES_FILE}
+        shift 2
+        ;;
+      --labels)
+        validate_argument $1 $2
+        echo "GCE_LABELS=$2" >> ${OVERRIDES_FILE}
         shift 2
         ;;
       -n|--num_workers)
